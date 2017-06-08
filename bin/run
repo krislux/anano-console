@@ -1,0 +1,53 @@
+#!/usr/bin/env php
+<?php
+use Anano\Console\Router;
+use Anano\Console\Arguments;
+
+$config = [
+
+    /**
+    * Set this to the folder(s) where your command files are located.
+    */
+
+    'command_dirs' => [
+        __DIR__ . '/app/commands'
+    ]
+    
+];
+
+
+/**
+ * Autoloading
+ */
+
+$autoload = false;
+
+$files = array(
+    __DIR__ . '/../../vendor/autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php'
+);
+
+foreach ($files as $file) {
+    if (file_exists($file)) {
+        $autoload = $file;
+        break;
+    }
+}
+
+if ( ! $autoload) {
+    echo "Please install and update Composer before continuing." . PHP_EOL;
+    exit(1);
+}
+
+require $autoload;
+
+
+/**
+ * Load
+ */
+
+$router = new Router( new Arguments($argv), $config );
+$res = $router->dispatch();
+echo $res->getMessage();
+exit($res->getCode());
