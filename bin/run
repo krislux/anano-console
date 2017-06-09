@@ -1,16 +1,20 @@
 #!/usr/bin/env php
 <?php
-use Anano\Console\Router;
-use Anano\Console\Arguments;
 
+/**
+ * Change this to where you store your config file,
+ * or ignore/delete it and use the settings below.
+ */
 $config_path = __DIR__ . '/app/config/console.php';
-if (file_exists($config_path)) {
+// ---------------------------------------------------
+
+if (isset($config_path) && file_exists($config_path)) {
     $config = require($config_path);
 }
 else {
     $config = [
         /**
-        * Set this to the folder(s) where your command files are located.
+        * The folder(s) where your command files are located.
         */
         'command_dirs' => [
             __DIR__ . '/app/commands'
@@ -26,6 +30,8 @@ else {
 $autoload = false;
 
 $files = array(
+    __DIR__ . '/../../../../vendor/autoload.php',
+    __DIR__ . '/../../../vendor/autoload.php',
     __DIR__ . '/../../vendor/autoload.php',
     __DIR__ . '/../vendor/autoload.php',
     __DIR__ . '/vendor/autoload.php'
@@ -49,6 +55,9 @@ require $autoload;
 /**
  * Load
  */
+
+use Anano\Console\Router;
+use Anano\Console\Arguments;
 
 $router = new Router( new Arguments($argv), $config );
 $res = $router->dispatch();

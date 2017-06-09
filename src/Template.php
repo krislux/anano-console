@@ -15,7 +15,7 @@ class Template extends Response
     public function __construct($name, array $symbols = null)
     {
         $filename = realpath(__DIR__ . "/../templates/$name.tpl");
-        if ( ! file_exists($filename)) {
+        if ( ! $filename) {
             throw new ErrorException("Template file `$filename` not found.");
         }
         
