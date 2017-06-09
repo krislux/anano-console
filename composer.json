@@ -18,6 +18,8 @@
             "Anano\\Console\\": "src/"
         }
     },
-    "bin": [ "bin/run" ],
-    "bin-dir": "./"
+    "config": {
+        "bin-dir": "./"
+    },
+    "bin": [ "bin/run" ]
 }
