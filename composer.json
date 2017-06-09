@@ -1,9 +1,9 @@
 {
     "name": "krislux/anano-console",
     "type": "library",
-    "version": "0.1",
+    "version": "1.0.0",
     "description": "Command interface, designed for Anano2 but works fine stand-alone.",
-    "keywords": [],
+    "keywords": [ "cli", "command line", "console", "anano", "task runner" ],
     "license": "MIT",
     "authors": [
         {
@@ -21,7 +21,7 @@
     },
     "scripts": {
         "post-update-cmd": [
-            "php -r \"copy('bin/run', __DIR__ . '/run');\""
+            "@php bin/install"
         ]
     }
 }

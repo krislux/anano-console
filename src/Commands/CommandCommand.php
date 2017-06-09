@@ -37,7 +37,9 @@ class CommandCommand extends Command
         }
         else {
             if ( ! is_dir($dir)) {
-                throw new ErrorException("`$dir` is not a valid directory.");
+                if ( ! mkdir($dir, 0755, true)) {
+                    throw new ErrorException("Directory `$dir` did not exist and could not be created.");
+                }
             }
         }
 

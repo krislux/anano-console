@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+$dirs = array(
+    __DIR__ . '/../../../',
+    __DIR__ . '/../../',
+    __DIR__ . '/../'
+);
+
+foreach ($dirs as $dir) {
+    if (file_exists($dir . 'vendor/autoload.php')) {
+        copy(__DIR__ . '/run', $dir . '/run');
+        chmod($dir . '/run', 0755);
+        echo "Binary `run` moved to root. You can now use `php run` to start.";
+        exit(0);
+    }
+}
+
+echo "Could not copy binary. Please copy `" . __DIR__ . "/run` to your project root.";
+exit(1);
