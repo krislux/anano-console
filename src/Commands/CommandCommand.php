@@ -1,26 +1,27 @@
 <?php namespace Anano\Console\Commands;
 
-use ErrorException;
-use Anano\Console\Command;
-use Anano\Console\Template;
-
 /**
  * Meta-command: The command to make and modify other command files.
  */
+
+use ErrorException;
+use Anano\Console\Command;
+use Anano\Console\Template;
 
 class CommandCommand extends Command
 {
     /**
      * Create a new Command class file
-     * -x  --example    Include helpful example content in the file.
+     * -c  --clean      Create a clean command file, do not include
+     *                  helpful example content in the file.
      *     --dir        Specify a directory for the file. If omitted,
      *                  defaults to first dir in `command_dirs`.
-     * -c  --confirm    Ask before creating file.
+     * -C  --confirm    Ask before creating file.
      */
     public function make($name)
     {
-        $tpl = $this->hasOption('x', 'example') ? 'command-example' : 'command-clean';
-        $buffer = new Template($tpl);
+        $tpl = $this->hasOption('c', 'clean') ? 'command-clean' : 'command-example';
+        $buffer = new Template($tpl, ['name' => ucfirst($name), 'lname' => strtolower($name)]);
 
         // Determine directory to place command in. If nothing provided, defaults to first item in 'command_dirs'.
         $command_dirs = $this->getConfig('command_dirs');
@@ -46,7 +47,11 @@ class CommandCommand extends Command
         $filename = $classname . '.php';
         $path = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $filename;
 
-        if ($this->hasOption('c', 'confirm')) {
+        if (file_exists($path)) {
+            if ( ! $this->confirm("This command file already exists. Attempt to overwrite?"))
+                return false;
+        }
+        else if ($this->hasOption('C', 'confirm')) {
             if ( ! $this->confirm("Command file `$classname` will be created at `$path`. Continue?"))
                 return false;
         }

@@ -1,24 +1,35 @@
 <?php namespace Anano\Console;
 
+/**
+ * Parse and keep command line arguments in an easy to read container.
+ * Arguments inherits ArrayAccess, so it can be used as an array, but with no
+ * risk of crashing on non-existent value.
+ * E.g. $arguments['test'] is the same $arguments->get('test');
+ */
+
 use ArrayAccess;
 
 class Arguments implements ArrayAccess
 {
-    public $count = 0;
-    public $bin;
-    public $command;
-    public $method;
-    public $positional = [];
-    public $options = [];
+    public $count = 0;       // Number of arguments, including caller
+    public $bin;             // The calling file
+    public $command;         // Command class called, if present
+    public $method;          // Command method called, if present
+    public $positional = []; // Any positional arguments
+    public $options = [];    // Any short and long options passed
     
+    /**
+     * @param  array  $args  The $argv from a cli call.
+     */
 
     public function __construct(array $args)
     {
         $this->count = count($args);
         
         $this->bin = $args[0];
+        $this->method = '__index';
 
-        if ($this->count >= 1) {
+        if ($this->count >= 2) {
             $cparts = explode(':', $args[1], 2);
             $this->command = $cparts[0];
             if (isset($cparts[1])) {
@@ -26,7 +37,7 @@ class Arguments implements ArrayAccess
             }
         }
 
-        if ($this->count >= 2) {
+        if ($this->count >= 3) {
             $this->parseOptions( array_slice($args, 2) );
         }
     }
@@ -55,7 +66,8 @@ class Arguments implements ArrayAccess
 
     /**
      * Get the value of a single option. Short options and valueless long options will return true.
-     * @param  string  Option to get value for.
+     * @param  string  $key  Option to get value for.
+     * @param  mixed   $def  Default value to return if key doesn't exist.
      * @return string
      */
     public function get($key, $def = null)
@@ -71,9 +83,11 @@ class Arguments implements ArrayAccess
     }
 
     /**
-     * 
+     * Read and parse command line options, placing them in the public vars.
+     * @param  array  $options
+     * @return void
      */
-    private function parseOptions($options)
+    private function parseOptions(array $options)
     {
         foreach ($options as $option) {
             

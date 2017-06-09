@@ -1,5 +1,11 @@
 <?php namespace Anano\Console;
 
+/**
+ * Simple class to read a template and replace some symbols with variable values.
+ * Template inherits Response, so it has a built-in __toString(), and the
+ * contents can be retrieved by simply using the class as a string.
+ */
+
 use ErrorException;
 
 class Template extends Response
@@ -17,8 +23,8 @@ class Template extends Response
 
         if ( ! empty($symbols)) {
             foreach ($symbols as $search => $replace) {
-                $search = "\{$search\}";
-                str_replace($search, $replace, $buffer);
+                $search = '{'.$search.'}';
+                $buffer = str_replace($search, $replace, $buffer);
             }
         }
 

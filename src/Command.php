@@ -1,5 +1,10 @@
 <?php namespace Anano\Console;
 
+/**
+ * Base class for all commands.
+ * Provides some helper methods to access options, command input, etc.
+ */
+
 abstract class Command
 {
     protected $args;
@@ -10,6 +15,14 @@ abstract class Command
     {
         $this->args = $args;
         $this->config = $config;
+    }
+
+    /**
+     * Write a line to output.
+     */
+    protected function writeLine($str)
+    {
+        echo $str . PHP_EOL;
     }
 
     /**

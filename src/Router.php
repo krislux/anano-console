@@ -1,5 +1,9 @@
 <?php namespace Anano\Console;
 
+/**
+ * The router handles autoloading, method routing and waking up the autodoc.
+ */
+
 use Exception;
 use ErrorException;
 use RecursiveDirectoryIterator;
@@ -14,7 +18,9 @@ final class Router
     private $files = [];
 
     /**
-     * 
+     * Build list of command files for later autoloading.
+     * @param  Arguments  $args    @see \Anano\Console\Arguments
+     * @param  array      $config  Array of configuration items.
      */
     public function __construct(Arguments $args, array $config)
     {
@@ -42,12 +48,15 @@ final class Router
     }
 
     /**
-     * 
+     * Autoload and call the specified command class and method,
+     * or run the auto-documenter if --help provided or invalid command.
+     * @return Response
      */
     public function dispatch()
     {
         if ( ! $this->args->command) {
-            return new Template('help');
+            $cmds = array_map(__NAMESPACE__ . "\\Autodoc::cmdToName", array_keys($this->files));
+            return new Template('help', ['commandlist' => implode(PHP_EOL, $cmds)]);
         }
 
         $cmdname = ucfirst($this->args->command) . 'Command';
@@ -57,10 +66,19 @@ final class Router
             // Init the command class
             $cmdname = "\\Anano\\Console\\Commands\\$cmdname";
             $command = new $cmdname($this->args, $this->config);
+            if ( ! $command instanceof Command) {
+                throw new ErrorException("$cmdname did not extend Command");
+            }
 
             $class = new ReflectionClass($command);
 
+            // Method was given.
             if ($this->args->method && $class->hasMethod($this->args->method)) {
+
+                // Magic preprocessor method
+                if ($class->hasMethod('__before')) {
+                    $command->__before($this->args);
+                }
                 
                 $method = new ReflectionMethod($command, $this->args->method);
 
@@ -75,15 +93,29 @@ final class Router
                 }
                 
                 try {
+                    // Run method
                     $rv = $method->invokeArgs($command, $this->args->positional);
                 } catch (Exception $exc) {
                     return new Response(false, $exc->getMessage());
                 }
 
+                // Magic postprocessor method
+                if ($class->hasMethod('__after')) {
+                    $rv = $command->__after($rv);
+                }
+
+                // Figure out what to return and print at the end.
+                if ($rv instanceof Response) {
+                    return $rv;
+                }
+                else if (is_string($rv)) {
+                    return new Response(true, $rv);
+                }
                 return new Response($rv !== false, $rv !== false ? "Done." : "Exited.");
             }
+            // No method was given.
             else {
-               return new Autodoc($class, $this->args);
+                return new Autodoc($class, $this->args);
             }
         }
         else {

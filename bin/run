@@ -3,17 +3,20 @@
 use Anano\Console\Router;
 use Anano\Console\Arguments;
 
-$config = [
-
-    /**
-    * Set this to the folder(s) where your command files are located.
-    */
-
-    'command_dirs' => [
-        __DIR__ . '/app/commands'
-    ]
-    
-];
+$config_path = __DIR__ . '/app/config/console.php';
+if (file_exists($config_path)) {
+    $config = require($config_path);
+}
+else {
+    $config = [
+        /**
+        * Set this to the folder(s) where your command files are located.
+        */
+        'command_dirs' => [
+            __DIR__ . '/app/commands'
+        ]
+    ];
+}
 
 
 /**

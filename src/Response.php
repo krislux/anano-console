@@ -1,12 +1,19 @@
 <?php namespace Anano\Console;
 
+/**
+ * Base class for all sent to output. Contains a string content buffer,
+ * and a success code for bash exit codes.
+ */
+
 class Response
 {
     protected $success = true;
     protected $message;
 
     /**
-     * 
+     * Create a standard response with a status and content string.
+     * @param  bool   $success   Did the process go as intended? Can be omitted.
+     * @param  string $message   Content buffer.
      */
     public function __construct($success, $message = null)
     {

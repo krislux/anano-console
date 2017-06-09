@@ -1,5 +1,11 @@
 <?php namespace Anano\Console;
 
+/**
+ * Documentation, documentation never changes...
+ * The auto-documenter uses reflection to describe and display
+ * helpful information about a command class or method.
+ */
+
 use ErrorException;
 use Reflector;
 use ReflectionClass;
@@ -22,6 +28,16 @@ class Autodoc extends Response
 
 
     /**
+     * Convert a command ("ExampleCommand") to its callable name ("example")
+     */
+    public static function cmdToName($cmd)
+    {
+        $cmd = preg_replace('/Command$/', '', $cmd);
+        return strtolower($cmd);
+    }
+
+
+    /**
      * Auto-document a command class
      */
     private function docClass($class, $args)
@@ -36,11 +52,16 @@ class Autodoc extends Response
         $lines[] = '------------------';
 
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($method->isConstructor() || $method->isDestructor())
+            // Hide constructors, destructors and deliberately hidden methods (beginning with _) from the doc list.
+            if ($method->isConstructor() || $method->isDestructor() || $method->getName()[0] == '_')
                 continue;
             
             $lines[] = $args->command . ':' . $method->getName() . ' ' . $this->listParams($method->getParameters());
-            $lines[] = str_repeat(' ', 8) . $this->parseComment($method->getDocComment(), true);
+
+            $comment = $method->getDocComment();
+            if ($comment) {
+                $lines[] = str_repeat(' ', 8) . $this->parseComment($comment, true);
+            }
         }
 
         return implode(PHP_EOL, $lines);
