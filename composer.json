@@ -18,9 +18,6 @@
             "Anano\\Console\\": "src/"
         }
     },
-    "scripts": {
-        "post-update-cmd": [
-            "@php bin/install"
-        ]
-    }
+    "bin": [ "bin/run" ],
+    "bin-dir": "./"
 }
