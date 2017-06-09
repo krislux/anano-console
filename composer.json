@@ -1,7 +1,6 @@
 {
     "name": "krislux/anano-console",
     "type": "library",
-    "version": "1.0.0",
     "description": "Command interface, designed for Anano2 but works fine stand-alone.",
     "keywords": [ "cli", "command line", "console", "anano", "task runner" ],
     "license": "MIT",
