@@ -63,4 +63,21 @@ class CommandCommand extends Command
             throw new ErrorException("`$path` is not writable. Check permissions or run as sudo.");
         }
     }
+
+    /**
+     * # Note: _ can be used to name methods as reserved words. This is still command:list
+     * List all command files in all directories.
+     * -l  --long   Display the full path of files instead of just the file name.
+     */
+    public function _list()
+    {
+        $dirs = $this->getConfig('command_dirs');
+        $long = $this->hasOption('l', 'long');
+        foreach ($dirs as $dir) {
+            echo $dir . PHP_EOL;
+            foreach (glob($dir . '/*Command.php') as $f) {
+                echo "    - " . ($long ? $f : basename($f)) . PHP_EOL;
+            }
+        }
+    }
 }

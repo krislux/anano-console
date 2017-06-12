@@ -37,6 +37,13 @@ class Autodoc extends Response
     }
 
 
+    public static function docFiles(array $cmdfiles)
+    {
+        $cmds = array_map(__CLASS__ . "::cmdToName", array_keys($cmdfiles));
+        return new Template('help', ['commandlist' => implode(PHP_EOL, $cmds)]);
+    }
+
+
     /**
      * Auto-document a command class
      */
@@ -75,7 +82,7 @@ class Autodoc extends Response
     {
         $comment = $this->parseComment( $method->getDocComment() );
         $param_list = $this->listParams($method->getParameters());
-        $descline = 'Usage: ' . $args->command . ':' . $args->method . ' ' . $param_list . ' [OPTIONS]';
+        $descline = 'Usage: ' . $args->command . ':' . ltrim($args->method, ':_') . ' ' . $param_list . ' [OPTIONS]';
 
         $lines = [ $descline ];
         
@@ -116,6 +123,11 @@ class Autodoc extends Response
         $lines = [];
         foreach (preg_split('/[\r\n]+/', $str) as &$line) {
             $line = preg_replace('/^[\s]*[\*\/]+\s{0,1}/', '', $line);
+
+            // Lines in doc comments beginning with # are true comments, hidden in the auto documentation.
+            if (isset($line[0]) && $line[0] == '#')
+                continue;
+
             if ($line) {
                 if ($only_first_line === true) {
                     return $line;

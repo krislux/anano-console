@@ -22,7 +22,7 @@ abstract class Command
      */
     protected function writeLine($str)
     {
-        echo $str . PHP_EOL;
+        echo trim($str) . PHP_EOL;
     }
 
     /**

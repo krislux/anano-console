@@ -31,8 +31,10 @@ class Arguments implements ArrayAccess
 
         if ($this->count >= 2) {
             $cparts = explode(':', $args[1], 2);
-            $this->command = $cparts[0];
-            if (isset($cparts[1])) {
+            if ($cparts[0][0] != '-') {
+                $this->command = $cparts[0];
+            }
+            if (isset($cparts[1]) && $cparts[1][0] != '-') {
                 $this->method = $cparts[1];
             }
         }
@@ -127,23 +129,23 @@ class Arguments implements ArrayAccess
      * ArrayAccess
      */
     
-     public function offsetExists($offset)
-     {
-        return $this->has($offset);
-     }
+    public function offsetExists($offset)
+    {
+    return $this->has($offset);
+    }
 
-     public function offsetGet($offset)
-     {
-        return $this->get($offset);
-     }
+    public function offsetGet($offset)
+    {
+    return $this->get($offset);
+    }
 
-     public function offsetSet($offset, $value)
-     {
-        throw new ErrorException('You cannot modify CLI arguments.');
-     }
+    public function offsetSet($offset, $value)
+    {
+    throw new ErrorException('You cannot modify CLI arguments.');
+    }
 
-     public function offsetUnset($offset)
-     {
-        throw new ErrorException('You cannot modify CLI arguments.');
-     }
+    public function offsetUnset($offset)
+    {
+    throw new ErrorException('You cannot modify CLI arguments.');
+    }
 }

@@ -16,6 +16,7 @@ final class Router
     private $args;
     private $config;
     private $files = [];
+    private $time_start;
 
     /**
      * Build list of command files for later autoloading.
@@ -26,6 +27,7 @@ final class Router
     {
         $this->args = $args;
         $this->config = $config;
+        $this->time_start = microtime(true);
 
         $dirs = $config['command_dirs'];
         $dirs[] = __DIR__ . '/Commands';
@@ -48,6 +50,22 @@ final class Router
     }
 
     /**
+     * Display some quick profiling information on exit if --profile is passed.
+     * Works with any command and method. --profile can still be used as a custom
+     * option in any command, although this message will be added.
+     */
+    public function __destruct()
+    {
+        if ($this->args->has('profile'))
+        {
+            $td = microtime(true) - $this->time_start;
+            $td = $td < 1 ? round($td * 1000, 2) . "ms" : round($td, 2) . "s";
+            $mem = round(memory_get_peak_usage(false) / 1048576, 2) . " MB";
+            printf("\nRuntime: %s - mem: %s", $td, $mem);
+        }
+    }
+
+    /**
      * Autoload and call the specified command class and method,
      * or run the auto-documenter if --help provided or invalid command.
      * @return Response
@@ -55,8 +73,7 @@ final class Router
     public function dispatch()
     {
         if ( ! $this->args->command) {
-            $cmds = array_map(__NAMESPACE__ . "\\Autodoc::cmdToName", array_keys($this->files));
-            return new Template('help', ['commandlist' => implode(PHP_EOL, $cmds)]);
+            return Autodoc::docFiles($this->files);
         }
 
         $cmdname = ucfirst($this->args->command) . 'Command';
@@ -72,8 +89,19 @@ final class Router
 
             $class = new ReflectionClass($command);
 
+            // Check if method exists
+            if ( ! $class->hasMethod($this->args->method)) {
+                // Try with _ prefix, which can be used to name methods as reserved words.
+                if ($class->hasMethod('_' . $this->args->method)) {
+                    $this->args->method = '_' . $this->args->method;
+                }
+                else {
+                    $this->args->method = null; // No such method.
+                }
+            }
+
             // Method was given.
-            if ($this->args->method && $class->hasMethod($this->args->method)) {
+            if ($this->args->method && $this->args->method) {
 
                 // Magic preprocessor method
                 if ($class->hasMethod('__before')) {
@@ -111,7 +139,7 @@ final class Router
                 else if (is_string($rv)) {
                     return new Response(true, $rv);
                 }
-                return new Response($rv !== false, $rv !== false ? "Done." : "Exited.");
+                return new Response($rv !== false);
             }
             // No method was given.
             else {
