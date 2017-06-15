@@ -44,7 +44,7 @@ All options can come before, after or inbetween positional arguments - all that 
 
 A command file has access to some helpful methods to access arguments, etc.
 
-- `$this->hasOption('a')` - (bool) Check if short argument *a* is set.
+- `$this->hasOption('a', 'aaaa')` - (bool) Check if either short argument *a* or long argument *aaaa* is set. Number and order of arguments irrelevant.
 
 - `$this->getOption('aaaa')` (mixed) Get value from long argument *aaaa*, or true if set with no value.
 

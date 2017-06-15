@@ -12,11 +12,18 @@ class Template extends Response
 {
     private $content;
 
+    private static $template_dirs = [];
+
+    public static function setDirs(array $dirs)
+    {
+        self::$template_dirs = $dirs;
+    }
+
     public function __construct($name, array $symbols = null)
     {
-        $filename = realpath(__DIR__ . "/../templates/$name.tpl");
+        $filename = $this->findFirstFile($name);
         if ( ! $filename) {
-            throw new ErrorException("Template file `$filename` not found.");
+            throw new ErrorException("Template file `$name` not found.");
         }
         
         $buffer = file_get_contents($filename);
@@ -29,5 +36,27 @@ class Template extends Response
         }
 
         $this->message = $buffer;
+    }
+
+    /**
+     * Find the first existing file, prefixing either nothing, one of the
+     * paths in `template_dirs` config, or the default template folder.
+     */
+    private function findFirstFile($name)
+    {
+        $dirs = self::$template_dirs;
+        array_unshift($dirs, '', __DIR__ . '/../templates');
+
+        foreach ($dirs as $dir) {
+            $dir .= $dir && $dir[strlen($dir) - 1] !== '/' ? '/' : '';
+
+            foreach (['', '.tpl'] as $ext) {
+                $path = $dir . $name . $ext;
+                if (file_exists($path))
+                    return $path;
+            }
+        }
+        
+        return false;
     }
 }

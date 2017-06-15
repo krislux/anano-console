@@ -29,6 +29,10 @@ final class Router
         $this->config = $config;
         $this->time_start = microtime(true);
 
+        if (isset($config['template_dirs'])) {
+            Template::setDirs($config['template_dirs']);
+        }
+
         $dirs = $config['command_dirs'];
         $dirs[] = __DIR__ . '/Commands';
 
@@ -47,8 +51,10 @@ final class Router
                 }
             }
         }
-    }
 
+        ksort($this->files);
+    }
+        
     /**
      * Display some quick profiling information on exit if --profile is passed.
      * Works with any command and method. --profile can still be used as a custom
@@ -62,7 +68,7 @@ final class Router
             $td = $td < 1 ? round($td * 1000, 2) . "ms" : round($td, 2) . "s";
             $mem = round(memory_get_peak_usage(false) / 1048576, 2) . " MB";
             printf("\nRuntime: %s - mem: %s", $td, $mem);
-        }
+    }
     }
 
     /**
@@ -78,14 +84,13 @@ final class Router
 
         $cmdname = ucfirst($this->args->command) . 'Command';
         if (isset($this->files[$cmdname])) {
-            require $this->files[$cmdname];
+            $classname = "\\Anano\\Console\\Commands\\$cmdname";
+
+            if ( ! class_exists($classname))
+                require $this->files[$cmdname];
 
             // Init the command class
-            $cmdname = "\\Anano\\Console\\Commands\\$cmdname";
-            $command = new $cmdname($this->args, $this->config);
-            if ( ! $command instanceof Command) {
-                throw new ErrorException("$cmdname did not extend Command");
-            }
+            $command = new $classname($this->args, $this->config);
 
             $class = new ReflectionClass($command);
 

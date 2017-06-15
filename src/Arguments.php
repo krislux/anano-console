@@ -129,23 +129,23 @@ class Arguments implements ArrayAccess
      * ArrayAccess
      */
     
-    public function offsetExists($offset)
-    {
-    return $this->has($offset);
-    }
+     public function offsetExists($offset)
+     {
+        return $this->has($offset);
+     }
 
-    public function offsetGet($offset)
-    {
-    return $this->get($offset);
-    }
+     public function offsetGet($offset)
+     {
+        return $this->get($offset);
+     }
 
-    public function offsetSet($offset, $value)
-    {
-    throw new ErrorException('You cannot modify CLI arguments.');
-    }
+     public function offsetSet($offset, $value)
+     {
+        throw new ErrorException('You cannot modify CLI arguments.');
+     }
 
-    public function offsetUnset($offset)
-    {
-    throw new ErrorException('You cannot modify CLI arguments.');
-    }
+     public function offsetUnset($offset)
+     {
+        throw new ErrorException('You cannot modify CLI arguments.');
+     }
 }
